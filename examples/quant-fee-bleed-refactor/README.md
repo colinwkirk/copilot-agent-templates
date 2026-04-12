@@ -17,7 +17,8 @@ This is exactly the kind of problem that benefits from the tetraphasic workflow:
 | File | Purpose |
 |------|---------|
 | `pre-prompt.md` | Project context, tech stack, and AI guardrails |
-| `prompt.md` | Initial prompt to kick off the Architect |
+| `prompt.md` | Initial prompt to kick off the Coordinator |
+| `agents/fee-bleed-coordinator.agent.md` | Coordinator agent — workflow entrypoint and phase orchestrator |
 | `agents/fee-bleed-architect.agent.md` | Architect agent definition |
 | `agents/fee-bleed-drafter.agent.md` | Drafter agent definition |
 | `agents/fee-bleed-implementer.agent.md` | Implementer agent definition |
@@ -27,7 +28,7 @@ This is exactly the kind of problem that benefits from the tetraphasic workflow:
 
 1. Copy the `agents/` files into your project's `.github/agents/` directory.
 2. Add `pre-prompt.md` content to your `.github/copilot-instructions.md` (or attach it as context).
-3. Open Copilot Chat and paste the contents of `prompt.md` to start the planning phase.
+3. Open Copilot Chat and paste the contents of `prompt.md` to start the coordinator, which will invoke the architect in Planning Mode.
 
 ## Likely Phase Breakdown
 
@@ -41,4 +42,4 @@ A real engagement with this workflow might produce phases like:
 | **Phase 4** | Optimize order routing — update the router to factor effective fee rates into venue selection, preferring maker-friendly routing where latency permits. |
 | **Phase 5** | Reconciliation hardening — add a post-trade reconciliation job that flags fee discrepancies above a threshold and alerts the ops channel. |
 
-Each phase goes through the full Architect → Drafter → Implementer → Reviewer loop before the next begins.
+Each phase goes through the full Coordinator → Architect → Drafter → Implementer → Reviewer loop before the next begins.
