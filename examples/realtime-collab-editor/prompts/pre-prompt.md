@@ -13,7 +13,10 @@
 - **Performance:** Yjs updates must be batched and debounced (200ms) before persistence writes. WebSocket broadcasts are immediate.
 
 ## AI Agent Workflow Rules
-- This project utilizes a **Tetra-phasic Agent Workflow** (`Architect` -> `Drafter` -> `Implementer` -> `Reviewer`).
-- Features must be broken down and strictly scoped via file contracts (`PLAN.md`, `ACCEPTANCE_CRITERIA.md`, `IMPLEMENTATION_DRAFT.md`, `REVIEW.md`).
+- This project utilizes a **Coordinator-Driven Tetraphasic Workflow** (`Coordinator` -> `Architect` -> `Drafter/Implementer` -> `Reviewer` -> `Coordinator`).
+- The coordinator (`@collab-editor-coordinator`) is the workflow entrypoint. It orchestrates subagent handoffs and maintains `DOCS/SYNCDOC_CURRENT_PHASE.md` as the phase tracker.
+- Features must be broken down and strictly scoped via file contracts (`PLAN.md`, `CURRENT_PHASE.md`, `ACCEPTANCE_CRITERIA.md`, `IMPLEMENTATION_DRAFT.md`, `REVIEW.md`).
+- The architect must declare a per-phase validation mode: `TEST_FIRST`, `TEST_WITH_IMPLEMENTATION`, or `MANUAL_VALIDATION_ONLY`.
+- Advanced QA is opt-in only. It is required only for regression, integration, end-to-end, or multi-service validation that exceeds the normal reviewer scope.
 - Existing systems are off-limits and presumed working. Refactoring untouched code is prohibited unless an explicit "Refactor Phase" is defined and approved by the Architect.
 - Do not optimize prematurely. Follow the acceptance criteria exactly.

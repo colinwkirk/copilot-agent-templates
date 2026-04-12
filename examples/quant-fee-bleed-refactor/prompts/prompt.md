@@ -1,8 +1,8 @@
-@fee-bleed-architect
+@fee-bleed-coordinator
 
 Start the Meridian Fee Bleed Remediation project.
 
-The agents and tetra-phasic workflow have been configured, but the planning artifacts do not exist yet. This means you should begin in **Planning Mode**.
+The coordinator and tetraphasic workflow have been configured, but the planning artifacts do not exist yet. Start by invoking the architect in **Planning Mode**.
 
 Your task:
 
@@ -19,15 +19,18 @@ Your task:
 
 - DOCS/FEE_BLEED_PLAN.md
 - DOCS/PHASE_1_ACCEPTANCE_CRITERIA.md
+- DOCS/FEE_BLEED_CURRENT_PHASE.md
+
+In the acceptance criteria, include a clearly labeled `Validation Posture` section and a clearly labeled `QA Decision` section.
 
 The plan should:
 * identify the root causes of fee bleed based on code inspection
 * quantify the expected impact of each fix where possible
 * define the data/logging instrumentation needed before behavioral changes
 * break the work into distinct, sequential phases (instrumentation first, then fixes, then optimization)
+* declare the Phase 1 validation mode (`TEST_FIRST`, `TEST_WITH_IMPLEMENTATION`, or `MANUAL_VALIDATION_ONLY`) and justify it
+* declare whether advanced QA is required for Phase 1 and justify it only if the phase truly needs integration, regression, end-to-end, or multi-service validation
 * ensure Phase 1 is non-destructive (logging/instrumentation only) and deployable independently
 * define regression expectations: all changes must be validated against production fill data
 
-After writing those documents, hand off to:
-
-@fee-bleed-drafter
+After writing those documents, hand off to the coordinator-driven next phase selected by the architect recommendation.

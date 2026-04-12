@@ -14,7 +14,9 @@
 - **Styling constraints:** [e.g., Honor the global Theme schema. Never hardcode colors.]
 
 ## AI Agent Workflow Rules
-- This project utilizes a **Tetra-phasic Agent Workflow** (`Architect` -> `Drafter` -> `Implementer` -> `Reviewer`).
-- Features must be broken down and strictly scoped via file contracts (`PLAN.md`, `ACCEPTANCE_CRITERIA.md`, `IMPLEMENTATION_DRAFT.md`, `REVIEW.md`).
+- This project utilizes a **coordinator-driven Tetra-phasic Agent Workflow** (`Coordinator` -> `Architect` -> `Drafter/Implementer` -> `Reviewer` -> `Coordinator`).
+- Features must be broken down and strictly scoped via file contracts (`PLAN.md`, `CURRENT_PHASE.md`, `ACCEPTANCE_CRITERIA.md`, `IMPLEMENTATION_DRAFT.md`, `REVIEW.md`).
+- The architect must declare a per-phase validation mode: `TEST_FIRST`, `TEST_WITH_IMPLEMENTATION`, or `MANUAL_VALIDATION_ONLY`.
+- Advanced QA should remain opt-in and be required only for regression, integration, end-to-end, multi-service, or live-environment validation that exceeds the normal reviewer role.
 - Existing systems are off-limits and presumed working. Refactoring untouched code is prohibited unless an explicit "Refactor Phase" is defined and approved by the Architect.
 - Do not optimize prematurely. Follow the acceptance criteria exactly.

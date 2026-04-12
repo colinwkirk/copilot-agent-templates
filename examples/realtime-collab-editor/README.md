@@ -18,7 +18,8 @@ These systems are deeply interdependent. Building them in a single unstructured 
 | File | Purpose |
 |------|---------|
 | `pre-prompt.md` | Project context and AI guardrails |
-| `prompt.md` | Initial prompt to kick off the Architect |
+| `prompt.md` | Initial prompt to kick off the Coordinator |
+| `agents/collab-editor-coordinator.agent.md` | Coordinator agent — workflow entrypoint and phase orchestrator |
 | `agents/collab-editor-architect.agent.md` | Architect agent definition |
 | `agents/collab-editor-drafter.agent.md` | Drafter agent definition |
 | `agents/collab-editor-implementer.agent.md` | Implementer agent definition |
@@ -28,4 +29,4 @@ These systems are deeply interdependent. Building them in a single unstructured 
 
 1. Copy the `agents/` files into your project's `.github/agents/` directory.
 2. Add `pre-prompt.md` content to your `.github/copilot-instructions.md` (or attach it as context).
-3. Open Copilot Chat and paste the contents of `prompt.md` to start the planning phase.
+3. Open Copilot Chat and paste the contents of `prompt.md` to start the coordinator, which will invoke the architect in Planning Mode.
