@@ -114,6 +114,22 @@ Then:
 ### Workflow Creation
 workflow-reuse-check first
 
+Before generating project workflow files, the workflow generator should make a packaging decision:
+- `config-global-agents`: rely on a stable global generic coordinator/phase-agent set plus repository-local config and kickoff artifacts
+- `project-specific-generated-agents`: generate dedicated repository-local agent files for the workflow
+
+Prefer `config-global-agents` when minimizing agent sprawl is the main goal and only one workflow is expected to be active in the workspace at a time.
+Prefer `project-specific-generated-agents` when the repository must be self-contained, shareable, or able to host multiple simultaneous workflows without ambiguous agent targeting.
+
+If the correct packaging mode is unclear, the generator should ask a short intake question set before scaffolding.
+
+For `config-global-agents`, the standard repository-local outputs are:
+- `DOCS/WORKFLOW_CONFIG.md`
+- `DOCS/<current-phase-tracker>.md`
+- `.github/prompts/<task>-workflow-kickoff.prompt.md`
+
+That kickoff prompt should invoke `@tetraphasic-coordinator`, and the global generic phase agents should read `DOCS/WORKFLOW_CONFIG.md` first.
+
 When a new full workflow is generated, it should produce:
 - one coordinator agent
 - four phase agents
