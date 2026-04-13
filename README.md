@@ -145,6 +145,31 @@ The practical split is:
 
 If collaborators will not share the same global `.copilot` setup, prefer `project-specific-generated-agents` instead.
 
+### Shortcomings Of The Reuse Pattern
+
+The `config-global-agents` path is lighter, but it is not free.
+
+Common shortcomings:
+- hidden dependency on user profile state: the workflow depends on the global generic agents being present and current in `.copilot`
+- weaker team portability: collaborators may have the repository config files but not the same global agents or prompt setup
+- ambiguity under concurrency: if you want to run multiple workflows side by side in one workspace, generic global agents are easier to confuse than dedicated project agents
+- less baked-in domain context: highly specialized guardrails live in `DOCS/WORKFLOW_CONFIG.md` instead of directly in a dedicated agent definition
+- harder auditability: a repository-local workflow pack is easier to inspect, review, and commit as a complete self-contained system
+- more reliance on packaging assumptions: if those assumptions drift, the workflow may need to stop and be regenerated in discrete-agent mode
+
+### When To Prefer Generated Discrete Agents
+
+Use the workflow generator to create repository-local discrete agents when:
+- multiple workflows may be active in the same workspace at once
+- the workflow must be committed, shared, and reproducible for collaborators without requiring matching user-profile setup
+- the domain is unusually specialized, safety-critical, or constraint-heavy and you want those constraints embedded directly in the phase agent definitions
+- you expect long-lived project-specific workflows that should remain inspectable as repository assets
+- you want stronger operational clarity about which exact agent belongs to which task or initiative
+
+In other words:
+- prefer `config-global-agents` for low-friction reuse and reduced agent sprawl
+- prefer `project-specific-generated-agents` for portability, concurrency safety, and stronger per-project encapsulation
+
 **Option B — Copy templates manually:**
 1. Copy the contents of `templates/` into your project (agent files go in `.github/agents/`, prompt files in `.github/prompts/`).
 2. Copy `.github/copilot-instructions.md` into your project's `.github/` folder.
