@@ -87,7 +87,88 @@ When relying on AI for complex tasks, context windows limit performance. By sepa
 **Option A — Use the workflow generator (recommended):**
 1. Open this repository alongside your target repository in VS Code.
 2. Invoke `@global-tetraphasic-workflow-generator` in Copilot Chat with a description of your project or feature.
-3. The generator will produce a complete coordinator-driven workflow pack tailored to your repository.
+3. The generator will first decide whether the workflow should use `config-global-agents` or `project-specific-generated-agents`.
+4. If that packaging decision is ambiguous, it should ask a short intake question set before scaffolding.
+5. It will then produce either a repository-local config-driven workflow setup or a complete coordinator-driven workflow pack tailored to your repository.
+
+### Packaging Modes
+
+- `config-global-agents`: best when you already maintain a stable global tetraphasic agent set in your user profile and want to reduce agent sprawl in VS Code. The repository gets config and kickoff artifacts instead of dedicated per-project phase agents.
+- `project-specific-generated-agents`: best when you need the workflow to be self-contained inside the repository, shared with collaborators, or able to run multiple workflows side by side in the same workspace without ambiguous agent targeting.
+
+If multiple workflows may be active in the same workspace at once, `project-specific-generated-agents` is the safer default.
+
+In `config-global-agents` mode, the standard repository-local artifacts are:
+- `DOCS/WORKFLOW_CONFIG.md`
+- `DOCS/<current-phase-tracker>.md`
+- `.github/prompts/<task>-workflow-kickoff.prompt.md`
+
+Those artifacts are consumed by a stable global generic agent set headed by `@tetraphasic-coordinator`.
+
+### Using `DOCS/WORKFLOW_CONFIG.md`
+
+`DOCS/WORKFLOW_CONFIG.md` is the repository-local contract for the config-driven path. The global generic agents read it first and use it to resolve all workflow artifact paths and project-specific guardrails.
+
+At minimum, populate it with:
+- project identity: task title, task identifier, project name, core objective
+- artifact paths: plan file, current-phase tracker file, and the `PHASE_N` file patterns
+- bootstrap settings: initial phase, preferred validation mode, desired Phase 1 focus
+- repository survey targets: the modules or directories the architect should inspect first
+- domain guardrails: correctness, safety, migration, compatibility, or testing constraints
+- packaging assumptions: whether multiple workflows will run in the workspace and whether config mode is still safe
+
+How it works in practice:
+1. The kickoff prompt calls `@tetraphasic-coordinator`.
+2. The coordinator reads `DOCS/WORKFLOW_CONFIG.md` first.
+3. The coordinator reads the configured current-phase tracker and resolves the active phase artifact paths.
+4. Each generic phase agent also reads `DOCS/WORKFLOW_CONFIG.md` first before touching plan, acceptance, draft, implementation, review, or QA artifacts.
+5. If repository reality conflicts with the packaging assumptions in the config, the workflow should stop and be regenerated using `project-specific-generated-agents`.
+
+Use [workflow-config-template.md](/Users/colinwkirk/workspace/copilot-agent-templates/templates/workflow-config-template.md) as the starting point.
+
+### Wiring This Up Globally
+
+The config-driven path assumes the generic tetraphasic agents live in your user profile rather than in each repository.
+
+Recommended setup:
+1. Keep these global agents in `.copilot/agents/`:
+   `tetraphasic-coordinator`, `tetraphasic-architect`, `tetraphasic-drafter`, `tetraphasic-implementer`, `tetraphasic-reviewer`, and `tetraphasic-qa`.
+2. Keep the shared prompts in `.copilot/prompts/`, especially the generator prompt and workflow README prompt files.
+3. Ensure VS Code is configured to discover your global prompts and agents from your `.copilot` profile.
+4. In each target repository, generate or create only the repository-local config artifacts:
+   `DOCS/WORKFLOW_CONFIG.md`, the current-phase tracker, and the kickoff prompt.
+5. Start the workflow from the repository-local kickoff prompt, which should invoke `@tetraphasic-coordinator`.
+
+The practical split is:
+- global `.copilot`: reusable generic agents and reusable generator logic
+- repository `.github` and `DOCS/`: task-specific config, prompts, tracker, and workflow artifacts
+
+If collaborators will not share the same global `.copilot` setup, prefer `project-specific-generated-agents` instead.
+
+### Shortcomings Of The Reuse Pattern
+
+The `config-global-agents` path is lighter, but it is not free.
+
+Common shortcomings:
+- hidden dependency on user profile state: the workflow depends on the global generic agents being present and current in `.copilot`
+- weaker team portability: collaborators may have the repository config files but not the same global agents or prompt setup
+- ambiguity under concurrency: if you want to run multiple workflows side by side in one workspace, generic global agents are easier to confuse than dedicated project agents
+- less baked-in domain context: highly specialized guardrails live in `DOCS/WORKFLOW_CONFIG.md` instead of directly in a dedicated agent definition
+- harder auditability: a repository-local workflow pack is easier to inspect, review, and commit as a complete self-contained system
+- more reliance on packaging assumptions: if those assumptions drift, the workflow may need to stop and be regenerated in discrete-agent mode
+
+### When To Prefer Generated Discrete Agents
+
+Use the workflow generator to create repository-local discrete agents when:
+- multiple workflows may be active in the same workspace at once
+- the workflow must be committed, shared, and reproducible for collaborators without requiring matching user-profile setup
+- the domain is unusually specialized, safety-critical, or constraint-heavy and you want those constraints embedded directly in the phase agent definitions
+- you expect long-lived project-specific workflows that should remain inspectable as repository assets
+- you want stronger operational clarity about which exact agent belongs to which task or initiative
+
+In other words:
+- prefer `config-global-agents` for low-friction reuse and reduced agent sprawl
+- prefer `project-specific-generated-agents` for portability, concurrency safety, and stronger per-project encapsulation
 
 **Option B — Copy templates manually:**
 1. Copy the contents of `templates/` into your project (agent files go in `.github/agents/`, prompt files in `.github/prompts/`).

@@ -30,6 +30,11 @@ Before generating new workflow assets:
 - Use the reuse-check result to decide whether to reuse, adapt, or scaffold new workflow assets.
 - Only bypass reuse-check when the user explicitly requests net-new scaffolding or the environment cannot complete the subagent invocation.
 
+Before choosing the packaging strategy for a workflow:
+- Prefer a short intake step to decide between `config-global-agents` and `project-specific-generated-agents`.
+- Ask the user a small number of concise questions only when the correct packaging strategy is ambiguous from the request and workspace state.
+- Typical intake questions should clarify whether the user expects multiple workflows to run simultaneously in one workspace, whether stable generic global phase agents already exist, whether the output must be team-shared inside the repository, and whether project-specific domain constraints are strong enough to justify dedicated agents.
+
 When a full tetraphasic workflow is warranted, generate a coordinator entrypoint that orchestrates the phase agents as subagents.
 Keep the phase agents behaviorally aligned with the existing Architect, Drafter, Implementer, and Reviewer contracts.
 Generate an optional QA agent only when the requested workflow explicitly requires advanced validation beyond the normal reviewer role.
@@ -64,10 +69,15 @@ Before generating assets, gather or infer the following:
 - whether the user wants reuse or adaptation versus net-new scaffolding
 - whether prior reuse analysis is already available
 - whether the workflow generator should perform an internal fallback reuse check if the handoff cannot be completed
+- whether the workflow should use `config-global-agents` or `project-specific-generated-agents`
+- whether generic global tetraphasic phase agents already exist and are trusted for this workspace
+- whether the user expects multiple concurrent workflows in the same workspace
+- whether the workflow must be self-contained and shareable inside the repository rather than relying on user-profile assets
 
 
 If some values are missing, prefer concise placeholders or explicit assumptions over invention.
 If multiple repositories are open, select the most relevant destination from the user's request and state assumptions clearly.
+If packaging-mode inputs are missing and materially affect safety or usability, ask a short intake question set before generating assets.
 
 # Template Naming Conventions
 
@@ -85,6 +95,8 @@ Use these naming conventions when locating templates:
   - `current-phase-tracker-template.md`
   - `prompt-template.md`
   - `pre-prompt-template.md`
+  - `workflow-config-template.md`
+  - `config-mode-kickoff-template.md`
 
 - example prompt files:
   - `example-prompt.md`
@@ -114,6 +126,8 @@ Otherwise prefer the higher-priority template source.
 - `current-phase-tracker-template.md`
 - `pre-prompt-template.md`
 - `prompt-template.md`
+- `workflow-config-template.md`
+- `config-mode-kickoff-template.md`
 - `example-pre-prompt.md`
 - `example-prompt.md`
 
@@ -154,6 +168,15 @@ If a template is missing from the preferred source:
    - prefer templates from `../templates/`, then `~/.copilot/templates/`, then repository-local templates
    - prefer centralized templates over duplicating template logic in multiple repositories
    - do not recreate templates inline if a reusable template exists
+
+-1. Run a packaging-intake decision before generating project workflow artifacts.
+  - Decide whether the workflow should use `config-global-agents` or `project-specific-generated-agents`.
+  - Use direct evidence from the user's request and workspace first.
+  - Ask concise follow-up questions only when the packaging decision is ambiguous and would materially affect usability or safety.
+  - If the user plans to run multiple workflows simultaneously in one workspace, strongly prefer `project-specific-generated-agents` to avoid ambiguous agent targeting.
+  - If the user has stable generic global phase agents and wants to minimize agent sprawl, prefer `config-global-agents`.
+  - If the workflow must be repository-local, team-shareable, or self-contained without relying on user-profile setup, prefer `project-specific-generated-agents` unless the user explicitly accepts the dependency on global agents.
+  - If the domain constraints are unusually specialized or safety-critical, prefer `project-specific-generated-agents` unless the user explicitly prefers the config route.
    
 1. Extract the placeholder schema, conventions, and guardrails from the existing templates and instructions.
 2. Identify the destination repository for generated artifacts and keep the template repository read-only unless explicitly told otherwise.
@@ -165,6 +188,8 @@ If a template is missing from the preferred source:
    - Use full tetraphasic flow for large, cross-cutting, ambiguous, or high-risk initiatives.
    - Use a lighter workflow shape when the task is obviously small, bounded, low-risk, or meta in nature.
    - Do not force a full tetraphasic pack for trivial work, hotfixes, prompt-only changes, or updates to the workflow-generator itself unless the user explicitly requests it.
+   - Separately decide the workflow packaging mode: `config-global-agents` or `project-specific-generated-agents`.
+   - Treat workflow shape and packaging mode as separate choices.
 5. If generating or updating a tetraphasic pack, generate or update the five workflow agents:
   - coordinator
    - architect
@@ -172,15 +197,22 @@ If a template is missing from the preferred source:
    - implementer
    - reviewer
   - add QA only when advanced validation is explicitly required
+   - skip project-specific phase-agent generation when `config-global-agents` is the selected packaging mode, and instead generate the repository-local config and kickoff artifacts needed by the existing global agents
 6. Generate the companion kickoff artifacts requested by the user, typically:
   - a current-phase tracker file
    - a pre-prompt or context prompt
    - a kickoff prompt for the architect
+   - when `config-global-agents` is selected, generate or update the config artifact that supplies task identity, file contracts, domain guardrails, repository-survey targets, and packaging assumptions to the global agents
+  - in `config-global-agents` mode, standardize on these emitted files unless the user explicitly requests different names:
+    - `DOCS/WORKFLOW_CONFIG.md`
+    - `DOCS/${CURRENT_PHASE_FILE}.md`
+    - `.github/prompts/${task}-workflow-kickoff.prompt.md`
 7. Update the destination repository's `copilot-instructions.md` when repository-wide workflow guidance, workflow-selection policy, reuse policy, or role clarification is needed.
 8. Verify that handoffs, role boundaries, model responsibilities, file destinations, and workflow shape remain consistent.
   - Ensure the coordinator is the workflow entrypoint.
   - Ensure subagent support is configured in frontmatter where needed.
   - Ensure the phase agents do not take over orchestration responsibilities that belong to the coordinator.
+  - Ensure the selected packaging mode is explicit in the generated artifacts or rationale.
   - Ensure the generated tracker file is present and matches the coordinator contract.
   - Ensure validation mode is explicit in planning, drafting, implementation, review, and tracker artifacts.
   - Ensure advanced QA is absent by default and only generated when clearly justified.
@@ -198,6 +230,10 @@ When a reuse-check result exists, cite it explicitly in the rationale for reuse,
 When the user asks for reusable scaffolding, preserve placeholders.
 When the user asks for a project-specific workflow, fully instantiate filenames, agent names, and prompt text.
 
+The final output must also include:
+- recommended packaging mode (`config-global-agents` / `project-specific-generated-agents`)
+- rationale for the packaging-mode choice
+
 When a new full tetraphasic pack is actually needed, typically produce:
 - one coordinator agent file
 - one architect agent file
@@ -208,6 +244,12 @@ When a new full tetraphasic pack is actually needed, typically produce:
 - one current-phase tracker file
 - one kickoff prompt
 - one pre-prompt or shared context prompt
+
+When `config-global-agents` is selected, typically produce:
+- `DOCS/WORKFLOW_CONFIG.md`
+- `DOCS/${CURRENT_PHASE_FILE}.md`
+- one kickoff prompt that invokes `@tetraphasic-coordinator`
+- any repository-local instruction updates needed to explain the dependency on the global generic agents
 
 Do not generate duplicate agents that differ only cosmetically.
 
@@ -249,6 +291,18 @@ Choose **reuse or minimal adaptation** when:
 - an existing agent already fits the work
 - the requested change is mostly wording, scope tuning, or file-destination cleanup
 - the user is refining an existing workflow rather than starting a new initiative
+
+Choose **config-global-agents** when:
+- the user already has stable generic global tetraphasic agents available
+- the main goal is to reduce agent sprawl in VS Code
+- the workflow can safely rely on a repository-local config artifact plus kickoff prompt instead of project-specific agent files
+- only one workflow is expected to be active in the workspace at a time, or the user accepts the ambiguity tradeoff
+
+Choose **project-specific-generated-agents** when:
+- the user expects multiple workflows to run simultaneously in one workspace
+- the workflow must be self-contained and team-shareable inside the repository
+- the domain guardrails are specialized enough that dedicated agent text is safer or clearer
+- relying on user-profile global agents would make the workflow brittle for collaborators
 
 Choose a **reduced workflow** when:
 - the task is a small bugfix, hotfix, doc update, prompt update, or meta-agent update

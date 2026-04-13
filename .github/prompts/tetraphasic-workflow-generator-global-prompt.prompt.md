@@ -29,6 +29,8 @@ Do NOT treat it as a finalized specification.
 - Keep Phase 1 tightly scoped and structurally useful
 - Do not over-expand scope beyond what is clearly required
 - If the task is small or low-risk, allow a reduced workflow instead of forcing tetraphasic
+- Decide whether the workflow should use `config-global-agents` or `project-specific-generated-agents`
+- Ask a short intake question set only when that packaging choice is ambiguous and materially affects the outcome
 
 ---
 
@@ -44,6 +46,15 @@ Do NOT treat it as a finalized specification.
      - reuse
      - a reduced workflow
    - a full coordinator-driven tetraphasic workflow
+    - whether the packaging mode should be:
+       - `config-global-agents`
+       - `project-specific-generated-agents`
+
+    Packaging concerns to resolve when needed:
+    - Will multiple workflows run simultaneously in one workspace?
+    - Do stable generic global tetraphasic phase agents already exist?
+    - Must the result be self-contained and shareable in the repository?
+    - Are the domain guardrails specialized enough to justify dedicated agents?
 
 3. Prepare a clean, structured request for the workflow generator
 
@@ -69,10 +80,17 @@ With:
 The final output must include:
 
 - recommended workflow shape (reuse / reduced / tetraphasic)
+- recommended packaging mode (`config-global-agents` / `project-specific-generated-agents`)
 - coordinator-driven workflow artifacts when a full tetraphasic flow is applicable
 - generated or updated workflow artifacts (if applicable)
 - rationale for reuse vs new generation
+- rationale for packaging-mode choice
 - clearly scoped Phase 1 (if applicable)
+
+When `config-global-agents` is selected, expect the generator to standardize on:
+- `DOCS/WORKFLOW_CONFIG.md`
+- `DOCS/[CURRENT_PHASE_FILE].md`
+- `.github/prompts/[task]-workflow-kickoff.prompt.md`
 
 ---
 
